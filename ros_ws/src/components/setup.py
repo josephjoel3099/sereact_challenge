@@ -25,6 +25,7 @@ setup(
         "console_scripts": [
             "scanner = components.scanner:main",
             "door = components.door:main",
+            "emergency_stop = components.emergency_stop:main",
         ],
     },
 )
