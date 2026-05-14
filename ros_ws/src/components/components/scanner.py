@@ -9,7 +9,7 @@ class Scanner(Node):
     def __init__(self) -> None:
         super().__init__("scanner")
 
-        self.barode_msg: Int32 = Int32()
+        self.barcode_msg: Int32 = Int32()
         self.barcode_msg_publish_rate = 1
 
         self.init_publishers()
@@ -29,7 +29,7 @@ class Scanner(Node):
         self, request: Trigger.Request, response: Trigger.Response
     ) -> Trigger.Response:
         response.success = True
-        response.message = f"{self.barode_msg.data}"
+        response.message = f"{self.barcode_msg.data}"
         return response
 
     def random_barcode_generator(self) -> int:
@@ -39,8 +39,8 @@ class Scanner(Node):
         return random.randint(10000, 99999)
 
     def publish_barcode(self) -> None:
-        self.barode_msg.data = self.random_barcode_generator()
-        self.publisher.publish(self.barode_msg)
+        self.barcode_msg.data = self.random_barcode_generator()
+        self.publisher.publish(self.barcode_msg)
 
 
 def main(args: list[str] | None = None) -> None:
@@ -49,6 +49,8 @@ def main(args: list[str] | None = None) -> None:
 
     rclpy.init(args=args)
     node = Scanner()
+
+    # Avoids race conditions
     executor = SingleThreadedExecutor()
     executor.add_node(node)
 
