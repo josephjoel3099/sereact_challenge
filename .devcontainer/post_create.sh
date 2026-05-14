@@ -3,7 +3,7 @@ set -e
 
 source /opt/ros/humble/setup.bash
 
-ROS2_WS=/workspaces/bin_picking_cell/ros2_ws
+ROS2_WS=/workspaces/ws_sereact/ros_ws
 
 # Install rosdep deps if packages exist
 if [ -d "$ROS2_WS/src" ] && [ "$(ls -A $ROS2_WS/src)" ]; then

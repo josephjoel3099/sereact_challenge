@@ -31,5 +31,5 @@ RUN echo "source /opt/ros/humble/setup.bash" >> /home/ros/.bashrc \
     && echo "export ROS_DOMAIN_ID=0" >> /home/ros/.bashrc \
     && echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/ros/.bashrc
 
-WORKDIR /workspaces/bin_picking_cell
+WORKDIR /workspaces/ws_sereact
 USER ros
