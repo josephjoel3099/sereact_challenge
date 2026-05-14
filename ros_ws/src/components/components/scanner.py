@@ -15,12 +15,12 @@ class Scanner(Node):
         self.init_publishers()
         self.init_services()
 
-        self.timer = self.create_timer(
-            self.barcode_msg_publish_rate, self.publish_barcode
-        )
+        self.create_timer(self.barcode_msg_publish_rate, self.publish_barcode)
+
+        self.get_logger().info("Scanner node initialized")
 
     def init_publishers(self) -> None:
-        self.publisher = self.create_publisher(Int32, "scanned_barcode", 10)
+        self.barcode_publisher = self.create_publisher(Int32, "scanned_barcode", 10)
 
     def init_services(self) -> None:
         self.create_service(Trigger, "get_latest_barcode", self.get_latest_barcode)
@@ -40,7 +40,7 @@ class Scanner(Node):
 
     def publish_barcode(self) -> None:
         self.barcode_msg.data = self.random_barcode_generator()
-        self.publisher.publish(self.barcode_msg)
+        self.barcode_publisher.publish(self.barcode_msg)
 
 
 def main(args: list[str] | None = None) -> None:
@@ -62,7 +62,7 @@ def main(args: list[str] | None = None) -> None:
         executor.remove_node(node)
         node.destroy_node()
 
-        if not rclpy.ok():
+        if rclpy.ok():
             rclpy.shutdown()
 
 
