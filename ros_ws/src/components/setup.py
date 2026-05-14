@@ -27,6 +27,7 @@ setup(
             "door = components.door:main",
             "emergency_stop = components.emergency_stop:main",
             "stack_light = components.stack_light:main",
+            "robot_cell = components.robot_cell_client:main",
         ],
     },
 )
