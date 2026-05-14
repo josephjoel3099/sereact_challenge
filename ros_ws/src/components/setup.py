@@ -26,6 +26,7 @@ setup(
             "scanner = components.scanner:main",
             "door = components.door:main",
             "emergency_stop = components.emergency_stop:main",
+            "stack_light = components.stack_light:main",
         ],
     },
 )
