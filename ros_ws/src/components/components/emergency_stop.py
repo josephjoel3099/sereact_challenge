@@ -40,6 +40,9 @@ class EmergencyStop(Node):
         self.emergency_stop_status = not self.emergency_stop_status
         self.emergency_stop_msg.data = self.emergency_stop_status
         response.success = True
+        response.message = (
+            f"Emergency stop status toggled to {self.emergency_stop_status}"
+        )
 
         return response
 

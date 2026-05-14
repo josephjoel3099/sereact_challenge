@@ -41,7 +41,7 @@ class Door(Node):
         """Toggle the door closed state; response.success reflects the new state."""
         self.door_closed_status = not self.door_closed_status
         response.success = self.door_closed_status
-        response.message = "Door closed status toggled"
+        response.message = f"Door closed status toggled to {self.door_closed_status}"
         return response
 
     def publish_door_closed_status(self) -> None:
