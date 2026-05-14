@@ -15,7 +15,7 @@ class Scanner(Node):
         self.init_publishers()
         self.init_services()
 
-        self.create_timer(self.barcode_msg_publish_rate, self.publish_barcode)
+        self.create_timer(1.0 / self.barcode_msg_publish_rate, self.publish_barcode)
 
         self.get_logger().info("Scanner node initialized")
 

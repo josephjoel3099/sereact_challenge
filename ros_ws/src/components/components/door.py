@@ -16,7 +16,7 @@ class Door(Node):
         self.init_services()
 
         self.create_timer(
-            self.door_closed_status_publish_rate, self.publish_door_closed_status
+            1.0 / self.door_closed_status_publish_rate, self.publish_door_closed_status
         )
 
         self.get_logger().info("Door node initialized")
