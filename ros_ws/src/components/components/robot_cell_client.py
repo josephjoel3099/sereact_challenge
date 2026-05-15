@@ -1,4 +1,5 @@
 import asyncio
+import json
 import threading
 
 import httpx
@@ -7,7 +8,7 @@ from fastapi import FastAPI
 from fastapi import Request as FastAPIRequest
 from pydantic import BaseModel
 from rclpy.node import Node
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, String
 from std_srvs.srv import Trigger
 
 from components.stack_light import StackLightState
@@ -49,6 +50,7 @@ class RobotCellClient(Node):
         self._stack_light_status: StackLightState = StackLightState.INITIALIZING
 
         self.init_clients()
+        self.init_publishers()
         self.init_subscribers()
 
         self.get_logger().info("RobotCellClient node initialized")
@@ -56,6 +58,11 @@ class RobotCellClient(Node):
     def init_clients(self) -> None:
         """Create service clients."""
         self._scanner_client = self.create_client(Trigger, "get_latest_barcode")
+
+    def init_publishers(self) -> None:
+        """Create publishers for pick events so the HMI can display them."""
+        self._pick_request_pub = self.create_publisher(String, "pick_request", 10)
+        self._pick_response_pub = self.create_publisher(String, "pick_response", 10)
 
     def init_subscribers(self) -> None:
         """Create subscribers."""
@@ -89,6 +96,10 @@ class RobotCellClient(Node):
             f"Processing pick {request.pickId}, quantity {request.quantity}"
         )
 
+        req_msg = String()
+        req_msg.data = json.dumps({"pickId": request.pickId, "quantity": request.quantity})
+        self._pick_request_pub.publish(req_msg)
+
         try:
             barcode = await asyncio.to_thread(self.get_barcode)
             pick_successful = (
@@ -115,6 +126,10 @@ class RobotCellClient(Node):
             errorMessage=error_message,
             itemBarcode=barcode,
         )
+
+        res_msg = String()
+        res_msg.data = json.dumps(confirmation.model_dump())
+        self._pick_response_pub.publish(res_msg)
 
         async with httpx.AsyncClient() as client:
             try:
