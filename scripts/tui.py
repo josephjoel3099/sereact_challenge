@@ -101,8 +101,8 @@ def launch_components():
         subprocess.run("pkill robot_cell", shell=True)
         subprocess.run("pkill ui", shell=True)
         time.sleep(1)
-    except:
-        pass
+    except Exception as e:
+        return f"EXCEPTION\n{str(e)}"
 
     try:
         COMPONENTS_PROCESS = subprocess.Popen(
@@ -118,18 +118,18 @@ def launch_components():
 
 
 def stop_components():
-    global COMPONENTS_PROCESS
-
-    if COMPONENTS_PROCESS is None or COMPONENTS_PROCESS.poll() is not None:
-        return "No components running"
 
     try:
-        COMPONENTS_PROCESS.terminate()
-        COMPONENTS_PROCESS.wait(timeout=5)
+        subprocess.run("pkill -f 'ros2 launch components'", shell=True)
+        subprocess.run("pkill emergency_stop", shell=True)
+        subprocess.run("pkill door", shell=True)
+        subprocess.run("pkill stack_light", shell=True)
+        subprocess.run("pkill scanner", shell=True)
+        subprocess.run("pkill robot_cell", shell=True)
+        subprocess.run("pkill ui", shell=True)
+        subprocess.run("pkill hmi", shell=True)
+        time.sleep(1)
         return "Components stopped"
-    except subprocess.TimeoutExpired:
-        COMPONENTS_PROCESS.kill()
-        return "Components killed (timeout)"
     except Exception as e:
         return f"EXCEPTION\n{str(e)}"
 
