@@ -17,3 +17,5 @@ grep -qxF "source $ROS2_WS/install/setup.bash 2>/dev/null || true" ~/.bashrc \
     || echo "source $ROS2_WS/install/setup.bash 2>/dev/null || true" >> ~/.bashrc
 
 echo "Done! Run: source ~/.bashrc"
+
+nohup uvicorn api.wms_server:app --port 8081 &

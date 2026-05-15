@@ -31,17 +31,31 @@ class EmergencyStop(Node):
 
     def init_services(self) -> None:
         """Register the service for toggling the emergency stop."""
-        self.create_service(Trigger, "emergency_stop_toggle", self.emergency_stop)
+        self.create_service(Trigger, "press_emergency_stop", self.press_emergency_stop)
+        self.create_service(Trigger, "release_emergency_stop", self.release_emergency_stop)
 
-    def emergency_stop(
+    def press_emergency_stop(
         self, request: Trigger.Request, response: Trigger.Response
     ) -> Trigger.Response:
-        """Toggle the e-stop state and acknowledge the request."""
-        self.emergency_stop_status = not self.emergency_stop_status
+        """Press the e-stop state and acknowledge the request."""
+        self.emergency_stop_status = True
         self.emergency_stop_msg.data = self.emergency_stop_status
         response.success = True
         response.message = (
-            f"Emergency stop status toggled to {self.emergency_stop_status}"
+            f"Emergency stop status pressed to {self.emergency_stop_status}"
+        )
+
+        return response
+
+    def release_emergency_stop(
+        self, request: Trigger.Request, response: Trigger.Response
+    ) -> Trigger.Response:
+        """Release the e-stop state and acknowledge the request."""
+        self.emergency_stop_status = False
+        self.emergency_stop_msg.data = self.emergency_stop_status
+        response.success = True
+        response.message = (
+            f"Emergency stop status released to {self.emergency_stop_status}"
         )
 
         return response
