@@ -42,3 +42,7 @@ async def confirm_pick(confirmation: PickConfirmation):
     """Receive pick confirmation from the robot cell."""
     print(f"[WMS] Pick confirmation received: {confirmation.model_dump()}")
     return {"message": "Confirmation received"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
