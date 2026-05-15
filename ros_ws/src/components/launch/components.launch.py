@@ -10,5 +10,6 @@ def generate_launch_description() -> LaunchDescription:
             Node(package="components", executable="stack_light"),
             Node(package="components", executable="scanner"),
             Node(package="hmi", executable="ui"),
+            Node(package="components", executable="robot_cell"),
         ]
     )
