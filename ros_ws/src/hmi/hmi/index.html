@@ -1,37 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Picking Cell HMI</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: monospace; background: #111; color: #ddd; padding: 20px; }
-h1 { font-size: 1.3em; color: #fff; }
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.conn { font-size: 0.75em; }
-.conn-ok  { color: #4caf50; }
-.conn-err { color: #f44336; }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.card { background: #1e1e1e; border: 1px solid #333; border-radius: 6px; padding: 14px; }
-.card h2 { font-size: 0.7em; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 10px; }
-.row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #252525; }
-.row:last-child { border-bottom: none; }
-.key { color: #777; }
-.val { text-align: right; color: #eee; }
-.ok   { color: #4caf50; }
-.warn { color: #ff9800; }
-.err  { color: #f44336; }
-.dim  { color: #444; }
-.full { grid-column: 1 / -1; }
-.light-wrap { display: flex; align-items: center; gap: 16px; }
-.light { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #333; flex-shrink: 0; transition: background 0.25s, box-shadow 0.25s; }
-.lg { background: #4caf50; box-shadow: 0 0 14px #4caf5099; }
-.ly { background: #ffeb3b; box-shadow: 0 0 14px #ffeb3b99; }
-.lr { background: #f44336; box-shadow: 0 0 14px #f4433699; }
-.lx { background: #333; }
-.light-label { font-size: 1em; }
-</style>
-</head>
+  <head>
+  <meta charset="UTF-8">
+  <title>Picking Cell HMI</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: monospace; background: #111; color: #ddd; padding: 20px; }
+      h1 { font-size: 1.3em; color: #fff; }
+      .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+      .conn { font-size: 0.75em; }
+      .conn-ok  { color: #4caf50; }
+      .conn-err { color: #f44336; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .card { background: #1e1e1e; border: 1px solid #333; border-radius: 6px; padding: 14px; }
+      .card h2 { font-size: 0.7em; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 10px; }
+      .row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #252525; }
+      .row:last-child { border-bottom: none; }
+      .key { color: #777; }
+      .val { text-align: right; color: #eee; }
+      .ok   { color: #4caf50; }
+      .warn { color: #ff9800; }
+      .err  { color: #f44336; }
+      .dim  { color: #444; }
+      .full { grid-column: 1 / -1; }
+      .light-wrap { display: flex; align-items: center; gap: 16px; }
+      .light { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #333; flex-shrink: 0; transition: background 0.25s, box-shadow 0.25s; }
+      .lg { background: #4caf50; box-shadow: 0 0 14px #4caf5099; }
+      .ly { background: #ffeb3b; box-shadow: 0 0 14px #ffeb3b99; }
+      .lr { background: #f44336; box-shadow: 0 0 14px #f4433699; }
+      .lx { background: #333; }
+      .light-label { font-size: 1em; }
+      .stale { opacity: 0.5; color: #888; }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+      }
+      .conn-disconnected {
+        animation: pulse 0.8s infinite;
+        font-size: 0.9em;
+        font-weight: bold;
+      }
+    </style>
+  </head>
 <body>
 <div class="header">
   <h1>Picking Cell HMI</h1>
@@ -82,7 +92,24 @@ function set(id, text, cls) {
   el.className = "val" + (cls ? " " + cls : "");
 }
 
+function markStale() {
+  const slShape = document.getElementById("sl-shape");
+  slShape.className = "light lr";
+  document.getElementById("sl-label").textContent = "DISCONNECTED";
+  document.getElementById("sl-label").classList.add("stale");
+  document.getElementById("estop").classList.add("stale");
+  document.getElementById("door").classList.add("stale");
+}
+
+function markFresh() {
+  document.getElementById("sl-shape").classList.remove("stale");
+  document.getElementById("sl-label").classList.remove("stale");
+  document.getElementById("estop").classList.remove("stale");
+  document.getElementById("door").classList.remove("stale");
+}
+
 function render(s) {
+  markFresh();
   if (s.stack_light !== null && s.stack_light !== undefined) {
     const info = SL[String(s.stack_light)] || { cls: "lx", label: "UNKNOWN (" + s.stack_light + ")" };
     document.getElementById("sl-shape").className = "light " + info.cls;
@@ -110,7 +137,7 @@ function connect() {
   const ws = new WebSocket("ws://" + location.host + "/ws");
   ws.onopen    = () => { connEl.textContent = "● Connected";               connEl.className = "conn conn-ok";  };
   ws.onmessage = (e) => { try { render(JSON.parse(e.data)); } catch (_) {} };
-  ws.onclose   = () => { connEl.textContent = "● Disconnected — reconnecting..."; connEl.className = "conn conn-err"; setTimeout(connect, 2000); };
+  ws.onclose   = () => { connEl.textContent = "● DISCONNECTED"; connEl.className = "conn conn-err conn-disconnected"; markStale(); setTimeout(connect, 2000); };
   ws.onerror   = () => ws.close();
 }
 connect();
