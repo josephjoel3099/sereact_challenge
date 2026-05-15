@@ -16,3 +16,4 @@ install
 log
 __pycache__
 nohup.out
+wms_server.pid
