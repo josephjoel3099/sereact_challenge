@@ -17,3 +17,4 @@ log
 __pycache__
 nohup.out
 wms_server.pid
+.pytest_cache
