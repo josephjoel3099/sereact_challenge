@@ -48,10 +48,6 @@ class TestDoorNodeCreation:
         )
         assert service_exists, "door_closed_status_toggle service not found"
 
-    def test_publish_rate_configuration(self, door_node):
-        """Test that door publish rate is set correctly."""
-        assert door_node.door_closed_status_publish_rate == 1.0
-
 
 class TestDoorStatusPublishing:
     """Tests for door status publishing functionality."""

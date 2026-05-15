@@ -8,7 +8,7 @@ NODE_NAME = "scanner"
 TOPIC_SCANNED_BARCODE = "scanned_barcode"
 SERVICE_GET_LATEST_BARCODE = "get_latest_barcode"
 QUEUE_SIZE = 10
-PUBLISH_RATE = 1  # Hz
+BARCODE_PUBLISH_RATE = 1  # Hz
 BARCODE_MIN = 10000
 BARCODE_MAX = 99999
 
@@ -24,7 +24,7 @@ class Scanner(Node):
         self.init_publishers()
         self.init_services()
 
-        self.create_timer(1.0 / PUBLISH_RATE, self.publish_barcode)
+        self.create_timer(1.0 / BARCODE_PUBLISH_RATE, self.publish_barcode)
 
         self.get_logger().info("Scanner node initialized")
 

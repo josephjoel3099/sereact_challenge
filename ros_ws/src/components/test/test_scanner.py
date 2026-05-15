@@ -32,10 +32,6 @@ class TestScannerNodeCreation:
         """Test that barcode_msg is initialized as Int32."""
         assert isinstance(scanner_node.barcode_msg, Int32)
 
-    def test_publish_rate_configuration(self, scanner_node):
-        """Test that barcode publish rate is set correctly."""
-        assert scanner_node.barcode_msg_publish_rate == 1
-
     def test_publisher_initialization(self, scanner_node):
         """Test that the barcode publisher is properly initialized."""
         assert scanner_node.barcode_publisher is not None

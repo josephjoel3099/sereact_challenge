@@ -6,7 +6,7 @@ NODE_NAME = "door"
 TOPIC_DOOR_CLOSED_STATUS = "door_closed_status"
 SERVICE_DOOR_CLOSED_STATUS_TOGGLE = "door_closed_status_toggle"
 QUEUE_SIZE = 10
-PUBLISH_RATE = 1.0  # Hz
+DOOR_CLOSED_STATUS_PUBLISH_RATE = 1.0  # Hz
 
 
 class Door(Node):
@@ -23,7 +23,7 @@ class Door(Node):
         self.init_services()
 
         self.create_timer(
-            1.0 / PUBLISH_RATE, self.publish_door_closed_status
+            1.0 / DOOR_CLOSED_STATUS_PUBLISH_RATE, self.publish_door_closed_status
         )
 
         self.get_logger().info("Door node initialized")

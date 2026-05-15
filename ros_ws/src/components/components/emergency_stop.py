@@ -7,7 +7,7 @@ TOPIC_EMERGENCY_STOP_STATUS = "emergency_stop_status"
 SERVICE_PRESS_EMERGENCY_STOP = "press_emergency_stop"
 SERVICE_RELEASE_EMERGENCY_STOP = "release_emergency_stop"
 QUEUE_SIZE = 10
-PUBLISH_RATE = 10  # Hz
+EMERGENCY_STOP_STATUS_PUBLISH_RATE = 10  # Hz
 INITIAL_STATE_ACTIVE = True
 
 
@@ -25,7 +25,7 @@ class EmergencyStop(Node):
         self.init_services()
 
         self.create_timer(
-            1.0 / PUBLISH_RATE, self.publish_emergency_stop_status
+            1.0 / EMERGENCY_STOP_STATUS_PUBLISH_RATE, self.publish_emergency_stop_status
         )
 
         self.get_logger().info("Emergency stop node initialized")

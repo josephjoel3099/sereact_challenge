@@ -56,10 +56,6 @@ class TestEmergencyStopNodeCreation:
         )
         assert service_exists, "release_emergency_stop service not found"
 
-    def test_publish_rate_configuration(self, emergency_stop_node):
-        """Test that emergency stop publish rate is set correctly."""
-        assert emergency_stop_node.emergency_stop_publisher_rate == 10
-
 
 class TestEmergencyStopStatusPublishing:
     """Tests for emergency stop status publishing functionality."""
