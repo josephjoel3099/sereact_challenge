@@ -20,7 +20,8 @@ RUN pip3 install --no-cache-dir \
     uvicorn[standard] \
     httpx \
     websockets \
-    pydantic
+    pydantic \
+    pytest==9.0.3
 
 RUN useradd -m -s /bin/bash ros \
     && echo "ros ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
