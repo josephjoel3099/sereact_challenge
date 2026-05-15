@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Picking Cell HMI</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: monospace; background: #111; color: #ddd; padding: 20px; }
+h1 { font-size: 1.3em; color: #fff; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.conn { font-size: 0.75em; }
+.conn-ok  { color: #4caf50; }
+.conn-err { color: #f44336; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.card { background: #1e1e1e; border: 1px solid #333; border-radius: 6px; padding: 14px; }
+.card h2 { font-size: 0.7em; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 10px; }
+.row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #252525; }
+.row:last-child { border-bottom: none; }
+.key { color: #777; }
+.val { text-align: right; color: #eee; }
+.ok   { color: #4caf50; }
+.warn { color: #ff9800; }
+.err  { color: #f44336; }
+.dim  { color: #444; }
+.full { grid-column: 1 / -1; }
+.light-wrap { display: flex; align-items: center; gap: 16px; }
+.light { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #333; flex-shrink: 0; transition: background 0.25s, box-shadow 0.25s; }
+.lg { background: #4caf50; box-shadow: 0 0 14px #4caf5099; }
+.ly { background: #ffeb3b; box-shadow: 0 0 14px #ffeb3b99; }
+.lr { background: #f44336; box-shadow: 0 0 14px #f4433699; }
+.lx { background: #333; }
+.light-label { font-size: 1em; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Picking Cell HMI</h1>
+  <span class="conn conn-err" id="conn">&#9679; Connecting...</span>
+</div>
+<div class="grid">
+
+  <div class="card full">
+    <h2>Stack Light</h2>
+    <div class="light-wrap">
+      <div class="light lx" id="sl-shape"></div>
+      <span class="light-label" id="sl-label">Waiting for data...</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Cell Status</h2>
+    <div class="row"><span class="key">Emergency Stop</span><span class="val dim" id="estop">&#8212;</span></div>
+    <div class="row"><span class="key">Door Handle</span><span class="val dim" id="door">&#8212;</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Pick Request</h2>
+    <div class="row"><span class="key">Pick ID</span><span class="val dim" id="req-id">&#8212;</span></div>
+    <div class="row"><span class="key">Quantity</span><span class="val dim" id="req-qty">&#8212;</span></div>
+  </div>
+
+  <div class="card full">
+    <h2>Pick Response</h2>
+    <div class="row"><span class="key">Pick ID</span><span class="val dim" id="res-id">&#8212;</span></div>
+    <div class="row"><span class="key">Successful</span><span class="val dim" id="res-ok">&#8212;</span></div>
+    <div class="row"><span class="key">Item Barcode</span><span class="val dim" id="res-barcode">&#8212;</span></div>
+    <div class="row"><span class="key">Error</span><span class="val dim" id="res-error">&#8212;</span></div>
+  </div>
+
+</div>
+<script>
+const SL = {
+  "-1": { cls: "lr", label: "EMERGENCY (-1)"    },
+  "0":  { cls: "lg", label: "OPERATIONAL (0)"   },
+  "1":  { cls: "ly", label: "PAUSED (1)"        },
+  "2":  { cls: "lx", label: "INITIALIZING (2)"  },
+};
+
+function set(id, text, cls) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = "val" + (cls ? " " + cls : "");
+}
+
+function render(s) {
+  if (s.stack_light !== null && s.stack_light !== undefined) {
+    const info = SL[String(s.stack_light)] || { cls: "lx", label: "UNKNOWN (" + s.stack_light + ")" };
+    document.getElementById("sl-shape").className = "light " + info.cls;
+    document.getElementById("sl-label").textContent = info.label;
+  }
+  if (s.emergency_stop !== null && s.emergency_stop !== undefined)
+    set("estop", s.emergency_stop ? "ACTIVE" : "INACTIVE", s.emergency_stop ? "err" : "ok");
+  if (s.door_closed !== null && s.door_closed !== undefined)
+    set("door", s.door_closed ? "CLOSED" : "OPEN", s.door_closed ? "ok" : "warn");
+  if (s.pick_request) {
+    set("req-id",  s.pick_request.pickId);
+    set("req-qty", s.pick_request.quantity);
+  }
+  if (s.pick_response) {
+    const r = s.pick_response;
+    set("res-id",      r.pickId);
+    set("res-ok",      r.pickSuccessful ? "YES" : "NO", r.pickSuccessful ? "ok" : "err");
+    set("res-barcode", r.itemBarcode);
+    set("res-error",   r.errorMessage ?? "None", r.errorMessage ? "err" : "");
+  }
+}
+
+function connect() {
+  const connEl = document.getElementById("conn");
+  const ws = new WebSocket("ws://" + location.host + "/ws");
+  ws.onopen    = () => { connEl.textContent = "● Connected";               connEl.className = "conn conn-ok";  };
+  ws.onmessage = (e) => { try { render(JSON.parse(e.data)); } catch (_) {} };
+  ws.onclose   = () => { connEl.textContent = "● Disconnected — reconnecting..."; connEl.className = "conn conn-err"; setTimeout(connect, 2000); };
+  ws.onerror   = () => ws.close();
+}
+connect();
+</script>
+</body>
+</html>
