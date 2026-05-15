@@ -42,7 +42,7 @@ class EmergencyStop(Node):
         self.emergency_stop_msg.data = self.emergency_stop_status
         response.success = True
         response.message = (
-            f"Emergency stop status pressed to {self.emergency_stop_status}"
+            f"Emergency stop status: {self.emergency_stop_status}"
         )
 
         return response
@@ -55,7 +55,7 @@ class EmergencyStop(Node):
         self.emergency_stop_msg.data = self.emergency_stop_status
         response.success = True
         response.message = (
-            f"Emergency stop status released to {self.emergency_stop_status}"
+            f"Emergency stop status: {self.emergency_stop_status}"
         )
 
         return response
