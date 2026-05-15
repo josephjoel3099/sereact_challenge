@@ -2,23 +2,30 @@ from rclpy.node import Node
 from std_msgs.msg import Bool
 from std_srvs.srv import Trigger
 
+NODE_NAME = "emergency_stop"
+TOPIC_EMERGENCY_STOP_STATUS = "emergency_stop_status"
+SERVICE_PRESS_EMERGENCY_STOP = "press_emergency_stop"
+SERVICE_RELEASE_EMERGENCY_STOP = "release_emergency_stop"
+QUEUE_SIZE = 10
+PUBLISH_RATE = 10  # Hz
+INITIAL_STATE_ACTIVE = True
+
 
 class EmergencyStop(Node):
     """ROS2 node that publishes e-stop status and exposes a toggle service."""
 
     def __init__(self) -> None:
-        super().__init__("emergency_stop")
+        super().__init__(NODE_NAME)
 
         # Initialized as emergency stop active
-        self.emergency_stop_status: bool = True
+        self.emergency_stop_status: bool = INITIAL_STATE_ACTIVE
         self.emergency_stop_msg: Bool = Bool()
-        self.emergency_stop_publisher_rate: int = 10
 
         self.init_publishers()
         self.init_services()
 
         self.create_timer(
-            1.0 / self.emergency_stop_publisher_rate, self.publish_emergency_stop_status
+            1.0 / PUBLISH_RATE, self.publish_emergency_stop_status
         )
 
         self.get_logger().info("Emergency stop node initialized")
@@ -26,13 +33,13 @@ class EmergencyStop(Node):
     def init_publishers(self) -> None:
         """Create the emergency stop status publisher."""
         self.emergency_stop_publisher = self.create_publisher(
-            Bool, "emergency_stop_status", 10
+            Bool, TOPIC_EMERGENCY_STOP_STATUS, QUEUE_SIZE
         )
 
     def init_services(self) -> None:
         """Register the service for toggling the emergency stop."""
-        self.create_service(Trigger, "press_emergency_stop", self.press_emergency_stop)
-        self.create_service(Trigger, "release_emergency_stop", self.release_emergency_stop)
+        self.create_service(Trigger, SERVICE_PRESS_EMERGENCY_STOP, self.press_emergency_stop)
+        self.create_service(Trigger, SERVICE_RELEASE_EMERGENCY_STOP, self.release_emergency_stop)
 
     def press_emergency_stop(
         self, request: Trigger.Request, response: Trigger.Response

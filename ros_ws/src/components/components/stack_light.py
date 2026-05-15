@@ -7,6 +7,7 @@ STACK_LIGHT_STATUS_TOPIC = "stack_light_status"
 STACK_LIGHT_STATUS_PUBLISHER_RATE = 10  # Hz
 DOOR_CLOSED_STATUS_TOPIC = "/door_closed_status"
 EMERGENCY_STOP_STATUS_TOPIC = "/emergency_stop_status"
+QUEUE_SIZE = 10
 
 
 class StackLightState(Enum):
@@ -43,7 +44,7 @@ class StackLight(Node):
     def init_publishers(self) -> None:
         """Create the stack light status publisher."""
         self.stack_light_status_publisher = self.create_publisher(
-            Int32, STACK_LIGHT_STATUS_TOPIC, 10
+            Int32, STACK_LIGHT_STATUS_TOPIC, QUEUE_SIZE
         )
 
     def init_subscribers(self) -> None:

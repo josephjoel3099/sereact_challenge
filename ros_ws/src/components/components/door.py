@@ -2,23 +2,28 @@ from rclpy.node import Node
 from std_msgs.msg import Bool
 from std_srvs.srv import Trigger
 
+NODE_NAME = "door"
+TOPIC_DOOR_CLOSED_STATUS = "door_closed_status"
+SERVICE_DOOR_CLOSED_STATUS_TOGGLE = "door_closed_status_toggle"
+QUEUE_SIZE = 10
+PUBLISH_RATE = 1.0  # Hz
+
 
 class Door(Node):
     """ROS2 node that publishes door closed status and exposes a toggle service."""
 
     def __init__(self) -> None:
-        super().__init__("door")
+        super().__init__(NODE_NAME)
 
         # initialize door as open (sensor will determine closed status)
         self.door_closed_status: bool = False
         self.door_closed_status_msg: Bool = Bool()
-        self.door_closed_status_publish_rate: float = 1.0
 
         self.init_publishers()
         self.init_services()
 
         self.create_timer(
-            1.0 / self.door_closed_status_publish_rate, self.publish_door_closed_status
+            1.0 / PUBLISH_RATE, self.publish_door_closed_status
         )
 
         self.get_logger().info("Door node initialized")
@@ -26,13 +31,13 @@ class Door(Node):
     def init_publishers(self) -> None:
         """Create the door closed status publisher."""
         self.door_closed_status_publisher = self.create_publisher(
-            Bool, "door_closed_status", 10
+            Bool, TOPIC_DOOR_CLOSED_STATUS, QUEUE_SIZE
         )
 
     def init_services(self) -> None:
         """Register the service for toggling the door closed status."""
         self.create_service(
-            Trigger, "door_closed_status_toggle", self.door_closed_status_callback
+            Trigger, SERVICE_DOOR_CLOSED_STATUS_TOGGLE, self.door_closed_status_callback
         )
 
     def door_closed_status_callback(

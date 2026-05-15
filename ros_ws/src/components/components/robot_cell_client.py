@@ -16,6 +16,12 @@ from components.stack_light import StackLightState
 WMS_CONFIRM_URL = "http://localhost:8081/confirmPick"
 ROBOT_CELL_HOST = "0.0.0.0"
 ROBOT_CELL_PORT = 8080
+NODE_NAME = "robot_cell_client"
+TOPIC_PICK_REQUEST = "pick_request"
+TOPIC_PICK_RESPONSE = "pick_response"
+QUEUE_SIZE = 10
+SCANNER_SERVICE_TIMEOUT = 3.0  # seconds
+SCANNER_WAIT_TIMEOUT = 5.0  # seconds
 
 
 class PickRequest(BaseModel):
@@ -45,7 +51,7 @@ class RobotCellClient(Node):
     """ROS2 node that receives pick requests via HTTP and confirms with a scanned barcode."""
 
     def __init__(self) -> None:
-        super().__init__("robot_cell_client")
+        super().__init__(NODE_NAME)
 
         self._stack_light_status: StackLightState = StackLightState.INITIALIZING
 
@@ -61,8 +67,8 @@ class RobotCellClient(Node):
 
     def init_publishers(self) -> None:
         """Create publishers for pick events so the HMI can display them."""
-        self._pick_request_pub = self.create_publisher(String, "pick_request", 10)
-        self._pick_response_pub = self.create_publisher(String, "pick_response", 10)
+        self._pick_request_pub = self.create_publisher(String, TOPIC_PICK_REQUEST, QUEUE_SIZE)
+        self._pick_response_pub = self.create_publisher(String, TOPIC_PICK_RESPONSE, QUEUE_SIZE)
 
     def init_subscribers(self) -> None:
         """Create subscribers."""
@@ -72,14 +78,14 @@ class RobotCellClient(Node):
 
     def get_barcode(self) -> int:
         """Call the scanner service and return the barcode. Blocks until response or timeout."""
-        if not self._scanner_client.wait_for_service(timeout_sec=3.0):
+        if not self._scanner_client.wait_for_service(timeout_sec=SCANNER_SERVICE_TIMEOUT):
             raise RuntimeError("Scanner service unavailable")
 
         future = self._scanner_client.call_async(Trigger.Request())
         event = threading.Event()
         future.add_done_callback(lambda _: event.set())
 
-        if not event.wait(timeout=5.0):
+        if not event.wait(timeout=SCANNER_WAIT_TIMEOUT):
             raise TimeoutError("Scanner service timed out")
 
         result = future.result()
