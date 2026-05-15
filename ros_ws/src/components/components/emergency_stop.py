@@ -1,3 +1,5 @@
+import threading
+
 from rclpy.node import Node
 from std_msgs.msg import Bool
 from std_srvs.srv import Trigger
@@ -16,6 +18,9 @@ class EmergencyStop(Node):
 
     def __init__(self) -> None:
         super().__init__(NODE_NAME)
+
+        # Lock to protect shared state from concurrent access
+        self._state_lock = threading.Lock()
 
         # Initialized as emergency stop active
         self.emergency_stop_status: bool = INITIAL_STATE_ACTIVE
@@ -45,12 +50,13 @@ class EmergencyStop(Node):
         self, request: Trigger.Request, response: Trigger.Response
     ) -> Trigger.Response:
         """Press the e-stop state and acknowledge the request."""
-        self.emergency_stop_status = True
-        self.emergency_stop_msg.data = self.emergency_stop_status
+        with self._state_lock:
+            self.emergency_stop_status = True
+            self.emergency_stop_msg.data = self.emergency_stop_status
+            status = self.emergency_stop_status
+
         response.success = True
-        response.message = (
-            f"Emergency stop status: {self.emergency_stop_status}"
-        )
+        response.message = f"Emergency stop status: {status}"
 
         return response
 
@@ -58,12 +64,13 @@ class EmergencyStop(Node):
         self, request: Trigger.Request, response: Trigger.Response
     ) -> Trigger.Response:
         """Release the e-stop state and acknowledge the request."""
-        self.emergency_stop_status = False
-        self.emergency_stop_msg.data = self.emergency_stop_status
+        with self._state_lock:
+            self.emergency_stop_status = False
+            self.emergency_stop_msg.data = self.emergency_stop_status
+            status = self.emergency_stop_status
+
         response.success = True
-        response.message = (
-            f"Emergency stop status: {self.emergency_stop_status}"
-        )
+        response.message = f"Emergency stop status: {status}"
 
         return response
 
