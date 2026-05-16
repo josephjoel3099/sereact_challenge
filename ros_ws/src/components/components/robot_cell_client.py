@@ -19,6 +19,8 @@ ROBOT_CELL_PORT = 8080
 NODE_NAME = "robot_cell_client"
 TOPIC_PICK_REQUEST = "pick_request"
 TOPIC_PICK_RESPONSE = "pick_response"
+TOPIC_STACK_LIGHT_STATUS = "/stack_light_status"
+GET_BARCODE_SERVICE = "get_latest_barcode"
 QUEUE_SIZE = 10
 SCANNER_SERVICE_TIMEOUT = 3.0  # seconds
 SCANNER_WAIT_TIMEOUT = 5.0  # seconds
@@ -63,7 +65,7 @@ class RobotCellClient(Node):
 
     def init_clients(self) -> None:
         """Create service clients."""
-        self._scanner_client = self.create_client(Trigger, "get_latest_barcode")
+        self._scanner_client = self.create_client(Trigger, GET_BARCODE_SERVICE)
 
     def init_publishers(self) -> None:
         """Create publishers for pick events so the HMI can display them."""
@@ -73,7 +75,7 @@ class RobotCellClient(Node):
     def init_subscribers(self) -> None:
         """Create subscribers."""
         self.create_subscription(
-            Int32, "/stack_light_status", self.stack_light_status_callback, 1
+            Int32, TOPIC_STACK_LIGHT_STATUS, self.stack_light_status_callback, 1
         )
 
     def get_barcode(self) -> int:

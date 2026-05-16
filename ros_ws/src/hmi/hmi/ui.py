@@ -1,10 +1,18 @@
-"""HMI node: browser dashboard served via FastAPI + WebSocket."""
+"""HMI node: browser dashboard served via FastAPI + WebSocket.
+
+This module embeds a ROS2 `hmi` node inside a FastAPI application and
+streams a small structured `state` object to connected WebSocket clients.
+
+Notes:
+- Port numbers are TCP port values (unit: number).
+- ROS subscription queue sizes are counts (unit: number of messages).
+"""
 
 import asyncio
 import json
 import threading
 from pathlib import Path
-from typing import Set
+from typing import Any, Dict, Set
 
 import rclpy
 import uvicorn
@@ -14,24 +22,49 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from std_msgs.msg import Bool, Int32, String
 
-HMI_HOST = "0.0.0.0"
-HMI_PORT = 8082
+HMI_HOST: str = "0.0.0.0"
+# TCP port used by the HTTP/WebSocket server (unit: TCP port number)
+HMI_PORT: int = 8082
+
+# ROS topic names
+TOPIC_ESTOP: str = "/emergency_stop_status"
+TOPIC_DOOR: str = "/door_closed_status"
+TOPIC_STACK_LIGHT: str = "/stack_light_status"
+TOPIC_PICK_REQUEST: str = "/pick_request"
+TOPIC_PICK_RESPONSE: str = "/pick_response"
+
+# Subscription queue size for ROS subscriptions (unit: messages)
+SUB_QUEUE_SIZE: int = 10
 
 _HTML_FILE = Path(__file__).parent / "index.html"
 
 
 class _ConnectionManager:
+    """Manage active WebSocket client connections and broadcasting.
+
+    The manager stores active `WebSocket` connections in a set and provides
+    utilities to accept new connections, remove them, and broadcast text
+    messages to all connected clients.
+    """
+
     def __init__(self) -> None:
         self._connections: Set[WebSocket] = set()
 
     async def connect(self, ws: WebSocket) -> None:
+        """Accept and register a new WebSocket client."""
         await ws.accept()
         self._connections.add(ws)
 
     def disconnect(self, ws: WebSocket) -> None:
+        """Remove a WebSocket client from the active set."""
         self._connections.discard(ws)
 
     async def broadcast(self, message: str) -> None:
+        """Send `message` to all connected clients (text frames).
+
+        Any failing connection is removed from the active set. `message`
+        should be a JSON-serialised string.
+        """
         for ws in list(self._connections):
             try:
                 await ws.send_text(message)
@@ -40,56 +73,72 @@ class _ConnectionManager:
 
 
 class HMINode(Node):
-    """ROS2 node that subscribes to cell topics and streams state to WebSocket clients."""
+    """ROS2 `hmi` node that subscribes to ROS topics and streams JSON state.
+
+    The node keeps a small dictionary `_state` representing the latest values
+    observed on the configured topics and uses the provided connection
+    manager to broadcast updates to connected WebSocket clients.
+    """
 
     def __init__(self, manager: _ConnectionManager, loop: asyncio.AbstractEventLoop) -> None:
         super().__init__("hmi")
-        self._manager = manager
-        self._loop = loop
-        self._state: dict = {
+        self._manager: _ConnectionManager = manager
+        self._loop: asyncio.AbstractEventLoop = loop
+        self._state: Dict[str, Any] = {
             "emergency_stop": None,
             "door_closed": None,
             "stack_light": None,
             "pick_request": None,
             "pick_response": None,
         }
-        self.create_subscription(Bool, "/emergency_stop_status", self._on_estop, 10)
-        self.create_subscription(Bool, "/door_closed_status", self._on_door, 10)
-        self.create_subscription(Int32, "/stack_light_status", self._on_stack_light, 10)
-        self.create_subscription(String, "/pick_request", self._on_pick_request, 10)
-        self.create_subscription(String, "/pick_response", self._on_pick_response, 10)
+
+        # Subscribe to ROS topics using constants and typed queue size
+        self.create_subscription(Bool, TOPIC_ESTOP, self._on_estop, SUB_QUEUE_SIZE)
+        self.create_subscription(Bool, TOPIC_DOOR, self._on_door, SUB_QUEUE_SIZE)
+        self.create_subscription(Int32, TOPIC_STACK_LIGHT, self._on_stack_light, SUB_QUEUE_SIZE)
+        self.create_subscription(String, TOPIC_PICK_REQUEST, self._on_pick_request, SUB_QUEUE_SIZE)
+        self.create_subscription(String, TOPIC_PICK_RESPONSE, self._on_pick_response, SUB_QUEUE_SIZE)
+
         self.get_logger().info(f"HMI node initialized — dashboard at http://localhost:{HMI_PORT}")
 
-    def get_state(self) -> dict:
+    def get_state(self) -> Dict[str, Any]:
+        """Return a shallow copy of the current HMI state."""
         return dict(self._state)
 
     def _push(self) -> None:
+        """Serialize `_state` to JSON and broadcast it on the event loop."""
         asyncio.run_coroutine_threadsafe(
             self._manager.broadcast(json.dumps(self._state)), self._loop
         )
 
     def _on_estop(self, msg: Bool) -> None:
-        self._state["emergency_stop"] = msg.data
+        """Callback for emergency stop status (unit: boolean)."""
+        self._state["emergency_stop"] = bool(msg.data)
         self._push()
 
     def _on_door(self, msg: Bool) -> None:
-        self._state["door_closed"] = msg.data
+        """Callback for door closed status (unit: boolean)."""
+        self._state["door_closed"] = bool(msg.data)
         self._push()
 
     def _on_stack_light(self, msg: Int32) -> None:
-        self._state["stack_light"] = msg.data
+        """Callback for stack light status (unit: integer code)."""
+        self._state["stack_light"] = int(msg.data)
         self._push()
 
     def _on_pick_request(self, msg: String) -> None:
+        """Callback for pick request JSON payload (unit: JSON object)."""
         try:
-            self._state["pick_request"] = json.loads(msg.data)
+            self._state["pick_request"] = json.loads(str(msg.data))
         except json.JSONDecodeError:
+            # leave previous value untouched on parse error
             pass
         self._push()
 
     def _on_pick_response(self, msg: String) -> None:
+        """Callback for pick response JSON payload (unit: JSON object)."""
         try:
-            self._state["pick_response"] = json.loads(msg.data)
+            self._state["pick_response"] = json.loads(str(msg.data))
         except json.JSONDecodeError:
             pass
         self._push()
