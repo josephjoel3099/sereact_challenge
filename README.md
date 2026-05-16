@@ -116,29 +116,29 @@ Actions may be slow especially ROS ones since they are running through a subproc
 | Nodes | Topics | Services |
 |-------|--------|----------|
 | `/door` | `/door_closed_status` | `/door_closed_status_toggle` |
-|
+| | | |
 | `/emergency_stop` | `/emergency_stop_status` | `/press_emergency_stop` |
 | | | `/release_emergency_stop` |
-|
+| | | |
 | `/hmi` | | |
 | `/robot_cell_client` | `/pick_request` | |
 | | `/pick_response` | |
-|
+| | | |
 | `/scanner` | `/scanned_barcode` |`/get_latest_barcode` |
-|
+| | | |
 | `/stack_light` | `/stack_light_status` | |
-
-# Degug TUI
-To inspect ROS topics
-<p align="center">
-<img src="docs/debug_tui.gif" width="900"/>
-</p>
 
 # Video
 <p align="center">
 <video width="820" height="540" controls>
   <source src="docs/video.mp4" type="video/mp4">
 </video>
+</p>
+
+# Degug TUI
+To inspect ROS topics
+<p align="center">
+<img src="docs/debug_tui.gif" width="900"/>
 </p>
 
 # License
