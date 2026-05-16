@@ -1,6 +1,11 @@
 # Sereact Challenge
 Simple simulated bin pick robot cell system
 
+## Prerequisites
+- Docker
+
+
+
 ## Architecture
 <p align="center">
 <img src="docs/architecture.jpg" width="900"/>
@@ -140,6 +145,11 @@ To inspect ROS topics
 <p align="center">
 <img src="docs/debug_tui.gif" width="900"/>
 </p>
+
+### Useful links
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Uvicorn](https://fastapi.tiangolo.com/deployment/server-workers/?h=uvicorn)
+- [LucidChart](https://www.lucidchart.com/pages)
 
 ## License
 MIT License
