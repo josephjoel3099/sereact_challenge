@@ -34,3 +34,5 @@ RUN echo "source /opt/ros/humble/setup.bash" >> /home/ros/.bashrc \
 
 WORKDIR /workspaces/ws_sereact
 USER ros
+
+RUN rosdep update
