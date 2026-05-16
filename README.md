@@ -25,7 +25,7 @@ Simple simulated bin pick robot cell system
 ## Tested Platforms
 - Windows 11 with Docker desktop
 - Ubuntu 22.04 (WSL on Windows 11)
-- Ubuntu 22.04s
+- Ubuntu 22.04
 
 ## Install
 ```
@@ -135,9 +135,9 @@ Actions may be slow especially ROS ones since they are running through a subproc
 
 ## Video
 <p align="center">
-<video width="820" height="540" controls>
-  <source src="docs/video.mp4" type="video/mp4">
-</video>
+  <a href="docs/video.mp4">
+    <img src="docs/thumbnail.gif" width="820" alt="Click to watch demo">
+  </a>
 </p>
 
 ## Degug TUI
