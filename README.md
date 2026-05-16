@@ -18,6 +18,7 @@ Simple simulated bin pick robot cell system
 - Stack light is initialized as `INITIALIZING` state and is changed once the emergency and door status is received.
 - HMI node only subscribes to ROS to publish to the HMI.
 - As per requirements there are 2 separate services for the E-stop and one for the Door that toggles it.
+- The WMS server is launched automatically among other initial setup using a `post_create` script after docker is build and launched.
 
 ## Stack Light Logic
 <p align="center">
