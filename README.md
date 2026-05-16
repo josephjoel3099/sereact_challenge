@@ -1,28 +1,34 @@
 # Sereact Challenge
 Simple simulated bin pick robot cell system
 
-# Architecture
+## Architecture
 <p align="center">
 <img src="docs/architecture.jpg" width="900"/>
 </p>
 
-# Initial UI
+## Stack Light Logic
+<p align="center">
+<img src="docs/stack_light_logic.png" width="900"/>
+</p>
+
+
+## Initial UI
 <p align="center">
 <img src="docs/hmi.png" width="900"/>
 </p>
 
-# Tested Platforms
+## Tested Platforms
 - Windows 11 with Docker desktop
 - Ubuntu 22.04 (WSL on Windows 11)
 - Ubuntu 22.04s
 
-# Install
+## Install
 ```
 git clone https://github.com/josephjoel3099/sereact_challenge.git
 ```
 
-# Run
-## On Windows
+## Run
+### On Windows
 ```
 cd sereact_challenge
 ```
@@ -46,7 +52,7 @@ bash -c "bash .devcontainer/post_create.sh && /bin/bash"
 python3 scripts/helper_tui.py
 ```
 
-## On VS Code
+### On VS Code
 1. Open cloned repository.
 2. Open in container.
 3. Open a new terminal.
@@ -55,7 +61,7 @@ python3 scripts/helper_tui.py
     python3 scripts/helper_tui.py
     ```
 
-## On Linux
+### On Linux
 ```
 cd sereact_challenge
 ```
@@ -79,7 +85,7 @@ docker run -it --rm \
 python3 scripts/helper_tui.py
 ```
 
-# Using the TUI
+## Using the TUI
 To make launching and running commands easy
 ### UI
 <p align="center">
@@ -103,45 +109,39 @@ To make launching and running commands easy
 | 7. | Stop Components |
 | 8. | Exit | Will not stop ROS nodes
 
-# HMI
+## HMI
 Hosted at: http://localhost:8082/
 
 > [!NOTE]
 > Requires node "hmi" running
 
-#### Disclaimer
+### Disclaimer
 Actions may be slow especially ROS ones since they are running through a subprocess. This is only for development/early concept stage.
 
-# Additional details
-| Nodes | Topics | Services |
-|-------|--------|----------|
+## Additional details
+| Node | Topics | Services |
+|------|--------|----------|
 | `/door` | `/door_closed_status` | `/door_closed_status_toggle` |
-| | | |
-| `/emergency_stop` | `/emergency_stop_status` | `/press_emergency_stop` |
-| | | `/release_emergency_stop` |
-| | | |
-| `/hmi` | | |
-| `/robot_cell_client` | `/pick_request` | |
-| | `/pick_response` | |
-| | | |
-| `/scanner` | `/scanned_barcode` |`/get_latest_barcode` |
-| | | |
-| `/stack_light` | `/stack_light_status` | |
+| `/emergency_stop` | `/emergency_stop_status` | `/press_emergency_stop` <br> `/release_emergency_stop` |
+| `/hmi` | — | — |
+| `/robot_cell_client` | `/pick_request` <br> `/pick_response` | — |
+| `/scanner` | `/scanned_barcode` | `/get_latest_barcode` |
+| `/stack_light` | `/stack_light_status` | — |
 
-# Video
+## Video
 <p align="center">
 <video width="820" height="540" controls>
   <source src="docs/video.mp4" type="video/mp4">
 </video>
 </p>
 
-# Degug TUI
+## Degug TUI
 To inspect ROS topics
 <p align="center">
 <img src="docs/debug_tui.gif" width="900"/>
 </p>
 
-# License
+## License
 MIT License
 
 Copyright (c) 2026 Joseph Joel
