@@ -115,6 +115,9 @@ To make launching and running commands easy
 | 8. | Exit | Will not stop ROS nodes
 
 ## HMI
+<p align="center">
+<img src="docs/hmi.gif" width="900"/>
+</p>
 Hosted at: http://localhost:8082/
 
 > [!NOTE]
