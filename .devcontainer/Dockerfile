@@ -26,13 +26,12 @@ RUN pip3 install --no-cache-dir \
 RUN useradd -m -s /bin/bash ros \
     && echo "ros ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-RUN rosdep init || true && rosdep update
-
-RUN echo "source /opt/ros/humble/setup.bash" >> /home/ros/.bashrc \
+    
+    RUN echo "source /opt/ros/humble/setup.bash" >> /home/ros/.bashrc \
     && echo "export ROS_DOMAIN_ID=0" >> /home/ros/.bashrc \
     && echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/ros/.bashrc
-
-WORKDIR /workspaces/ws_sereact
-USER ros
-
-RUN rosdep update
+    
+    WORKDIR /workspaces/ws_sereact
+    USER ros
+    
+RUN rosdep init || true && rosdep update

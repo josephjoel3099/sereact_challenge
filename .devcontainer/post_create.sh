@@ -3,11 +3,15 @@ set -e
 
 source /opt/ros/humble/setup.bash
 
-ROS2_WS=/workspaces/ws_sereact/ros_ws
+WS=/workspaces/ws_sereact
+ROS2_WS=$WS/ros_ws
+LOG_DIR=$WS/log
+
+mkdir -p $LOG_DIR
 
 # Start the WMS server in the background
-nohup uvicorn api.wms_server:app --port 8081 --log-level debug > log/nohup.out 2>&1 &
-echo $! > log/wms_server.pid
+nohup uvicorn api.wms_server:app --port 8081 --log-level debug > $LOG_DIR/nohup.out 2>&1 &
+echo $! > $LOG_DIR/wms_server.pid
 
 # Wait for server to be ready
 if ! timeout 60 bash -c '
