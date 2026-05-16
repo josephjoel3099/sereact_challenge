@@ -11,6 +11,14 @@ Simple simulated bin pick robot cell system
 <img src="docs/architecture.jpg" width="900"/>
 </p>
 
+### Notes
+- It was important that the WMS is void of ROS since it is an externally provided software. It only communicate throught FastAPI and Uvicorn server.
+- The Robot cell client is a combination of API handler and ROS node. This allows it to subcribe to topics necessary to send back to the WMS. It also processes the `pickSuccessful` and `errorMessage` data. It also gets the latest `itemBarcode` using a service.
+- I am using thread locks to avoid race conditions in E-stop and Door node since thier data change while publishing.
+- Stack light is initialized as `INITIALIZING` state and is changed once the emergency and door status is received.
+- HMI node only subscribes to ROS to publish to the HMI.
+- As per requirements there are 2 separate services for the E-stop and one for the Door that toggles it.
+
 ## Stack Light Logic
 <p align="center">
 <img src="docs/stack_light_logic.png" width="900"/>
